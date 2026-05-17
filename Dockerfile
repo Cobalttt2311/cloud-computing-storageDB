@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     libfreetype-dev \
     libonig-dev \
     libxml2-dev \
+    libzip-dev \
+    libpq-dev \
     zip \
     unzip \
     git \
@@ -23,6 +25,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         pcntl \
         bcmath \
         gd
+
+
 
 # Install Composer dari image resmi
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -42,9 +46,19 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Aktifkan mod_rewrite untuk Laravel routing
 RUN a2enmod rewrite
 
-# Konfigurasi Apache agar membaca .htaccess
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
-    && sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+# Set Apache document root ke public Laravel
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/sites-available/*.conf
+
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/apache2.conf \
+    /etc/apache2/conf-available/*.conf
+
+# # Konfigurasi Apache agar membaca .htaccess
+# RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
+#     && sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # Set environment production
 ENV APP_ENV=production
