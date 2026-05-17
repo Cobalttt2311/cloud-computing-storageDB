@@ -15,7 +15,6 @@ class RegisterController extends Controller
         return view('register.create');
     }
 
-    // Simpan data baru
     public function store(Request $request)
     {
         $validated = $request->validate([
