@@ -22,11 +22,11 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/modul6:${{ github.sha }} .
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/modul6:latest .
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/modul6:${{ github.sha }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/modul6:latest
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
